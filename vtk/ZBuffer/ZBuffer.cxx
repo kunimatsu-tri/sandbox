@@ -2,8 +2,9 @@
 // exact ZBuffer values.
 
 #include <chrono>
-#include <iostream>
 #include <cmath>
+#include <iostream>
+#include <numeric>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -62,6 +63,7 @@ int main(int argc, char *argv[]) {
 
   vtkNew<vtkRenderer> renderer;
   renderer->AddActor(actor.GetPointer());
+
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetOffScreenRendering(1);
   renWin->AddRenderer(renderer.GetPointer());
@@ -72,6 +74,7 @@ int main(int argc, char *argv[]) {
   color_filter->SetInput(renWin.GetPointer());
   color_filter->SetMagnification(1);
   color_filter->SetInputBufferTypeToRGBA();
+  color_filter->ReadFrontBufferOff();
   color_filter->Update();
 
   // Create Depth Map
@@ -79,6 +82,7 @@ int main(int argc, char *argv[]) {
   depth_filter->SetInput(renWin.GetPointer());
   depth_filter->SetMagnification(1);
   depth_filter->SetInputBufferTypeToZBuffer();
+  depth_filter->ReadFrontBufferOff();
   depth_filter->Update();
 
   vtkNew<vtkCamera> camera;
@@ -87,7 +91,7 @@ int main(int argc, char *argv[]) {
   renderer->SetActiveCamera(camera.GetPointer());
 
   std::vector<double> times;
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < 100; ++i) {
     // skipping kinematics calculation.
 
     auto start = std::chrono::system_clock::now();
@@ -151,6 +155,10 @@ int main(int argc, char *argv[]) {
   for (auto time : times) {
     std::cout << time << " ms" << std::endl;
   }
+
+  std::cout << " Average: "
+            << std::accumulate(times.begin(), times.end(), 0.0) / times.size()
+            << " ms" << std::endl;
 
   return EXIT_SUCCESS;
 }

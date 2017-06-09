@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-find_package(VTK 7.1.0 REQUIRED)
+find_package(VTK 7.1.0 REQUIRED
+  PATHS /home/kunimatsu/work/vtk/VTK/_build/v7.1
+)
 
 include(${VTK_USE_FILE})
 

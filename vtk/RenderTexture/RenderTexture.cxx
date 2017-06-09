@@ -14,6 +14,8 @@
 
 namespace {
 
+const bool kUseTexture = true;
+
 std::string RemoveFileExtention(const std::string& filepath) {
   const size_t last_dot = filepath.find_last_of(".");
   if (last_dot == std::string::npos) {
@@ -35,26 +37,26 @@ int main(int argc, char* argv[]) {
   vtkNew<vtkOBJReader> reader;
   reader->SetFileName(filename.c_str());
   reader->Update();
-
-  vtkNew<vtkPNGReader> texture_reader;
-  // Assuming .png file has the same name as .obj file.
-  texture_reader->SetFileName(
-      std::string(RemoveFileExtention(filename) + ".png").c_str());
-  texture_reader->Update();
-
-  vtkNew<vtkTexture> texture;
-  texture->SetInputConnection(texture_reader->GetOutputPort());
-  texture->InterpolateOn();
-
-  // Visualize
   vtkNew<vtkPolyDataMapper> mapper;
   mapper->SetInputConnection(reader->GetOutputPort());
-
   vtkNew<vtkActor> actor;
   actor->SetMapper(mapper.GetPointer());
 
-  // Add texture
-  actor->SetTexture(texture.GetPointer());
+
+  if (kUseTexture) {
+    vtkNew<vtkPNGReader> texture_reader;
+    // Assuming .png file has the same name as .obj file.
+    texture_reader->SetFileName(
+        std::string(RemoveFileExtention(filename) + ".png").c_str());
+    texture_reader->Update();
+
+    vtkNew<vtkTexture> texture;
+    texture->SetInputConnection(texture_reader->GetOutputPort());
+    texture->InterpolateOn();
+
+    // Add texture
+    actor->SetTexture(texture.GetPointer());
+  }
 
   vtkNew<vtkRenderer> renderer;
   renderer->AddActor(actor.GetPointer());

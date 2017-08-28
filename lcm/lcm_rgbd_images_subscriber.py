@@ -76,8 +76,10 @@ class ImageViewer(object):
         cv_color_image = np.array(list(color_data))
         cv_color_image = cv_color_image.view(np.uint8)
         cv_color_image = np.reshape(cv_color_image,
+        # color_row_stride / width is for calculating the number of channels in a pixel.
                                     (height, width, color_row_stride / width))
-        # color_row_stride / width is calculating the number of channels in a pixel.
+
+        cv_color_image = cv2.cvtColor(cv_color_image, cv2.COLOR_RGBA2BGRA)
 
         cv_depth_image = np.array(list(depth_data))
         # byte array to float array
@@ -85,7 +87,13 @@ class ImageViewer(object):
         cv_depth_image = np.reshape(cv_depth_image,
                                     (height, width, 1))
         # 1 is the number of channels in a pixel.
-        cv_depth_image = cv_depth_image * 51. # 255 / 5 = 51
+
+        sample = []
+        for x in range(-5, 5):
+            sample.append(cv_depth_image[240, x * 64 + 320][0])
+        print(sample)
+
+        cv_depth_image = cv_depth_image * 1000 # 255
         cv_depth_image = np.array(cv_depth_image, np.uint8)
 
         cv2.imshow("Color Image", cv_color_image)
